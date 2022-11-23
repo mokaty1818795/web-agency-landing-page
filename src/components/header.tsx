@@ -1,8 +1,22 @@
 import { Flex, Heading, HStack, Link, Icon } from "@chakra-ui/react";
-import React from "react";
+import { SessionWallet } from "algorand-session-wallet";
+import React, { useState } from "react";
 import { FiArrowUpRight } from "react-icons/fi";
+import { conf, sessionGetActiveConf } from "../algorand/config";
+import Signin from "../pages/landing/connection/signin";
 
 export const Header = () => {
+  const activeConf = sessionGetActiveConf();
+  const sw = new SessionWallet(conf[activeConf].network);
+  const [sessionWallet, setSessionWallet] = useState(sw);
+  const [accts, setAccounts] = useState(sw.accountList());
+  const [connected, setConnected] = useState(sw.connected());
+
+  function updateWallet(sw: SessionWallet) {
+    setSessionWallet(sw);
+    setAccounts(sw.accountList());
+    setConnected(sw.connected());
+  }
   return (
     <Flex
       px="200px"
@@ -27,10 +41,13 @@ export const Header = () => {
           <Link>About us</Link>
         </HStack>
       </Flex>
-      <Link color="whiteAlpha.800">
-        Get in touch
-        <Icon as={FiArrowUpRight} ml="10px" h={5} w={5} />
-      </Link>
+      <Signin
+        darkMode={false}
+        sessionWallet={sessionWallet}
+        accts={accts}
+        connected={connected}
+        updateWallet={updateWallet}
+      />
     </Flex>
   );
 };
